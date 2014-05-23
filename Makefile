@@ -1,7 +1,7 @@
 links=newsflashes stories audio-stops
 
-stories: wordpress.xml
-	node stories.js | jq -I -c -r '.objectId, .' > stories
+stories: import/wordpress.xml
+	node import/stories.js | jq -I -c -r '.objectId, .' > stories
 
 newsflashes:
 	curl 'http://newsflash.dx.artsmia.org/index.json' | jq -I -r -c '.object, .' > newsflashes
