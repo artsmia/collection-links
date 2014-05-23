@@ -6,7 +6,11 @@ parseString(fs.readFileSync('./import/wordpress.xml', 'utf8'), {trim: true, expl
   var items = result.rss.channel.item
   items.forEach(function(item) {
     var objectMatch = item['content:encoded'].match(/collections\.artsmia\.org.*detail&amp;id=(\d+)/)
-    if(objectMatch != undefined) out.push({title: item.title, link: item.link, objectId: objectMatch[1]})
+    if(objectMatch != undefined && item['wp:status'] == 'publish') out.push({
+      title: item.title,
+      link: "http://new.artsmia.org/stories/"+item['wp:post_name']+"/",
+      objectId: objectMatch[1]
+    })
   })
 })
 
