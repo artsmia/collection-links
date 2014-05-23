@@ -1,0 +1,7 @@
+figure
+  img(src="http://api.artsmia.org/images/#{id}/large.jpg")
+
+ul
+  for link in links
+    li
+      a(href="#{link.link}")=link.title

@@ -13,5 +13,6 @@ audio-stops:
 
 redis:
 	for links in $(links); do \
-		cat $$links | while read id; read json; redis-cli sadd object:$id:links $json; end; \
+		cat $$links | fish -c 'while read id; echo $$id; read json; redis-cli sadd object:$$id:links $$json > /dev/null; end'; \
 	done;
+# `fish -c` is terrible, but bash loses `"\""` quote escapes, which makes the `$$json` echoed into redis invalid

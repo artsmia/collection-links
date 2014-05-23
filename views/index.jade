@@ -1,0 +1,10 @@
+for object in linkedObjects
+  figure(id="work#{object.id}")
+    a(href="/work/#{object.id}")
+      img(src="http://api.artsmia.org/images/#{object.id}/small.jpg")
+    figcaption
+      ul
+        for link in object.links
+          li
+            a(href="#{link.link}")=link.title
+
