@@ -1,4 +1,4 @@
-links=stories newsflashes audio-stops artstories listen 3dmodels conservation
+links=stories newsflashes audio-stops artstories listen 3dmodels listen conservation
 
 stories: import/wordpress.xml
 	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, (. + {type: "mia-story"} )' > stories
@@ -27,11 +27,16 @@ artstories:
 			'$$id, {title: $$title, link: $$link, id: $$id, type: "3d"}'; \
 	done | jq -c -r '.' > 3dmodels
 
+listen:
+	curl --silent https://raw.githubusercontent.com/artsmia/listen/gh-pages/audio/index.json \
+	| jq -c -r 'to_entries | .[] | .value.id, {title: .value.title, object: .value.id, link: ("http://artsmia.github.io/listen/#/"+.key)}' \
+	> listen
+
 clean:
 	@rm stories newsflashes audio-stops artstories 3dmodels
 	redis-cli del $$(redis-cli --raw keys 'object:*:links')
 
-all: stories newsflashes audio-stops artstories 3dmodels
+all: stories newsflashes audio-stops artstories 3dmodels listen
 
 redis:
 	@for links in $(links); do \
@@ -48,3 +53,5 @@ rebake: clean all redis
 
 deploy:
 	rsync -avz --delete static/ ubuntu@staging.artsmia.org:/var/www/art/links/
+
+.PHONY: stories newsflashes audio-stops artstories 3dmodels listen
