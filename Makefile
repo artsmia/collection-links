@@ -1,10 +1,10 @@
-links=stories newsflashes audio-stops artstories
+links=stories newsflashes audio-stops artstories listen
 
 stories: import/wordpress.xml
-	node import/stories.js | jq -I -c -r '.objectIds, .' > stories
+	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, .' > stories
 
 newsflashes:
-	curl 'http://newsflash.dx.artsmia.org/index.json' | jq -I -r -c '.object, .' > newsflashes
+	curl 'http://newsflash.dx.artsmia.org/index.json' | jq -s -r -c '.[] | .[] | .object, .' > newsflashes
 
 audio-stops:
 	curl --silent https://raw.githubusercontent.com/artsmia/audio-stops/master/stops.min.json \
@@ -12,8 +12,8 @@ audio-stops:
 	> audio-stops
 
 artstories:
-	curl --silent http://griot.artsmia.org/griot/ \
-	| jq -I -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artsmia.github.io/griot/#/o/"+.id)}' \
+	curl --silent http://new.artsmia.org/crashpad/griot/ \
+	| jq -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artsmia.github.io/griot/#/o/"+.id)}' \
 	> artstories
 
 redis:
