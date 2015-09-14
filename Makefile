@@ -1,19 +1,19 @@
 links=stories newsflashes audio-stops artstories listen
 
 stories: import/wordpress.xml
-	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, .' > stories
+	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, (. + {type: "mia-story"} )' > stories
 
 newsflashes:
-	curl 'http://newsflash.dx.artsmia.org/index.json' | jq -s -r -c '.[] | reverse | .[] | .object, .' > newsflashes
+	curl 'http://newsflash.dx.artsmia.org/index.json' | jq -s -r -c '.[] | reverse | .[] | .object, (. + {type: "newsflash"} )' > newsflashes
 
 audio-stops:
 	curl --silent https://raw.githubusercontent.com/artsmia/audio-stops/master/stops.min.json \
-	| jq -c -r 'to_entries | map(.value) | .[] | .object_id, {title: .title, link: ("http://audio-tours.s3.amazonaws.com/"+.media_url)}' \
+	| jq -c -r 'to_entries | map(.value) | .[] | .object_id, {title: .title, link: ("http://audio-tours.s3.amazonaws.com/"+.media_url), type: "audio"}' \
 	> audio-stops
 
 artstories:
 	curl --silent http://new.artsmia.org/crashpad/griot/ \
-	| jq -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artstories.artsmia.org/#/o/"+.id)}' \
+	| jq -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artstories.artsmia.org/#/o/"+.id), type: "artstory"}' \
 	> artstories
 
 redis:
