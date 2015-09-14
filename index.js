@@ -15,6 +15,14 @@ app.get('/work/:id', function(req, res) {
   })
 })
 
+app.get('/json/:id', function(req, res) {
+  var key = 'object:'+req.params.id+':links'
+  client.smembers(key, function(err, reply) {
+    var links = reply.map(function(line) { return JSON.parse(line) })
+    res.json(200, links)
+  })
+})
+
 app.get('/', function(req, res) {
   client.keys('*:links', function(err, objectLinks) {
     var m = client.multi()
