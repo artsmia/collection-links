@@ -13,7 +13,7 @@ audio-stops:
 
 artstories:
 	curl --silent http://new.artsmia.org/crashpad/griot/ \
-	| jq -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artsmia.github.io/griot/#/o/"+.id)}' \
+	| jq -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artstories.artsmia.org/#/o/"+.id)}' \
 	> artstories
 
 redis:
