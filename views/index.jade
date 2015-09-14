@@ -1,7 +1,7 @@
 for object in linkedObjects
   figure(id="work#{object.id}")
-    a(href="/work/#{object.id}")
-      img(src="http://api.artsmia.org/images/#{object.id}/small.jpg")
+    h1
+      a(href="http://collection.staging.artsmia.org/#/art/#{object.id}")=object.id
     figcaption
       ul
         for link in object.links
