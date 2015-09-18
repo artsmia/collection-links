@@ -16,6 +16,12 @@ artstories:
 	| jq -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artstories.artsmia.org/#/o/"+.id), type: "artstory"}' \
 	> artstories
 
+clean:
+	@rm stories newsflashes audio-stops artstories
+	redis-cli del $$(redis-cli --raw keys 'object:*:links')
+
+all: stories newsflashes audio-stops artstories
+
 redis:
 	@for links in $(links); do \
 		cat $$links | fish -c 'while read ids; read json; set -l ids (echo $$ids | tr " " "\n"); for id in $$ids; echo $$id; redis-cli sadd object:$$id:links $$json > /dev/null; end; end'; true; \
@@ -27,3 +33,7 @@ bake:
 		id=$$(cut -d':' -f2 <<<$$link); \
 		redis-cli smembers $$link | jq -s '.' > static/$$id.json; \
 	done;
+rebake: clean all redis
+
+deploy:
+	rsync -avz --delete static/ ubuntu@staging.artsmia.org:/var/www/art/links/
