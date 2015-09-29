@@ -1,4 +1,4 @@
-links=stories newsflashes audio-stops artstories listen
+links=stories newsflashes audio-stops artstories listen 3dmodels
 
 stories: import/wordpress.xml
 	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, (. + {type: "mia-story"} )' > stories
@@ -16,11 +16,22 @@ artstories:
 	| jq -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artstories.artsmia.org/#/o/"+.id), type: "artstory"}' \
 	> artstories
 
+3dmodels:
+	curl --silent 'http://www.thingiverse.com/rss/user:343731' \
+	| xml2json \
+	| jq -c -r '.rss.channel.item[] | .title, .link' \
+	| while read title; do \
+	  read link; \
+		id=$$(curl --silent  $$link | grep 'page=detail' | head -1 | cut -d'=' -f3 | tr -d ' '); \
+		jq -n --arg title "$$title" --arg link "$$link" --arg id "$$id" \
+			'$$id, {title: $$title, link: $$link, id: $$id, type: "3d"}'; \
+	done | jq -c -r '.' > 3dmodels
+
 clean:
-	@rm stories newsflashes audio-stops artstories
+	@rm stories newsflashes audio-stops artstories 3dmodels
 	redis-cli del $$(redis-cli --raw keys 'object:*:links')
 
-all: stories newsflashes audio-stops artstories
+all: stories newsflashes audio-stops artstories 3dmodels
 
 redis:
 	@for links in $(links); do \
