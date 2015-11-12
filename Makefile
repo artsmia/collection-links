@@ -1,4 +1,4 @@
-links=stories newsflashes audio-stops artstories listen 3dmodels
+links=stories newsflashes audio-stops artstories listen 3dmodels conservation
 
 stories: import/wordpress.xml
 	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, (. + {type: "mia-story"} )' > stories
