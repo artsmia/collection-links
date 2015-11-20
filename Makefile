@@ -1,4 +1,4 @@
-links=stories newsflashes audio-stops artstories listen 3dmodels listen conservation
+links=stories audio-stops artstories listen 3dmodels listen conservation adopt-a-painting
 
 stories: import/wordpress.xml
 	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, (. + {type: "mia-story"} )' > stories
@@ -31,6 +31,16 @@ listen:
 	curl --silent https://raw.githubusercontent.com/artsmia/listen/gh-pages/audio/index.json \
 	| jq -c -r 'to_entries | .[] | .value.id, {title: .value.title, object: .value.id, link: ("http://artsmia.github.io/listen/#/"+.key)}' \
 	> listen
+
+adopt-a-painting:
+	@curl --silent curl 'http://new.artsmia.org/collections/fetch/adopt/children/' \
+	| jq -c -r 'to_entries[].value | .coll_adoptee_obj_id, { \
+		id: .coll_adoptee_obj_id, \
+		type: "adopt-a-painting", \
+		adopted: .coll_adoptee_is_adopted, \
+		description: .coll_adoptee_description, \
+		cost: .coll_adoptee_cost \
+	}' > adopt-a-painting
 
 clean:
 	@rm stories newsflashes audio-stops artstories 3dmodels
