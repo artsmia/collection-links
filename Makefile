@@ -4,7 +4,11 @@ stories: import/wordpress.xml
 	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, (. + {type: "mia-story"} )' > stories
 
 newsflashes:
-	curl 'http://newsflash.dx.artsmia.org/index.json' | jq -s -r -c '.[] | reverse | .[] | .object, (. + {type: "newsflash"} )' > newsflashes
+	curl 'http://newsflash.dx.artsmia.org/index.json' \
+	| jq -s -r -c '.[] \
+		| reverse | .[] | \
+		.object, (. + {type: "newsflash"} ) \
+	' > newsflashes
 
 audio-stops:
 	curl --silent https://raw.githubusercontent.com/artsmia/audio-stops/master/stops.min.json \
