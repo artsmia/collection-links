@@ -56,7 +56,7 @@ adopt-a-painting:
 
 clean:
 	@rm stories newsflashes audio-stops artstories 3dmodels
-	redis-cli del $$(redis-cli --raw keys 'object:*:links')
+	redis-cli --raw keys 'object:*:links' | xargs redis-cli del
 
 all: stories newsflashes audio-stops artstories 3dmodels listen
 
@@ -74,6 +74,6 @@ bake:
 rebake: clean all redis
 
 deploy:
-	rsync -avz --delete static/ ubuntu@staging.artsmia.org:/var/www/art/links/
+	rsync -avz --delete static/ collections:/var/www/art/links/
 
 .PHONY: stories newsflashes audio-stops artstories 3dmodels listen
