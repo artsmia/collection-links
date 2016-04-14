@@ -23,13 +23,21 @@ artstories:
 3dmodels:
 	curl --silent 'http://www.thingiverse.com/rss/user:343731' \
 	| xml2json \
-	| jq -c -r '.rss.channel.item[] | .title, .link' \
-	| while read title; do \
-	  read link; \
-		id=$$(curl --silent  $$link | grep 'page=detail' | head -1 | cut -d'=' -f3 | tr -d ' '); \
-		jq -n --arg title "$$title" --arg link "$$link" --arg id "$$id" \
-			'$$id, {title: $$title, link: $$link, id: $$id, type: "3d"}'; \
+	| jq -c -r '.rss.channel.item[]' \
+	| while read -r json; do \
+		description=$$(jq '.description' <<<$$json); \
+		link=$$(jq '.link' <<<$$json); \
+		id=$$(grep 'id=' <<<$$description | sed 's|.*id=\([0-9]*\).*|\1|'); \
+		thumb=$$(echo $$description | head -1 | sed 's|.*\(https://cdn.thingiverse.com/renders/.*jpg\).*|\1|'); \
+		echo $$json | jq --arg id "$$id" --arg thumb "$$thumb" \
+			'$$id, {title: .title, link: .link, id: $$id, type: "3d", thumb: $$thumb}'; \
 	done | jq -c -r '.' > 3dmodels
+	curl --silent 'https://api.sketchfab.com/v2/models?user=4a165be2661d4a6a866ea01d1f76334c' \
+	| jq -c '.results[]' \
+	| while read -r json; do \
+		id=$$(jq '.description' <<<$$json | grep artsmia.org | sed -e 's|.*artsmia.org/art/\([0-9]*\).*|\1|; s|.*artsmia.org/index.php?page=detail&id=\([0-9]*\).*|\1|'); \
+		jq --arg id "$$id" '$$id, {type: "3d", title: .name, link: .viewerUrl, thumb: .thumbnails.images[4].url}' <<<$$json; \
+	done | jq -c -r '.' >> 3dmodels;
 
 listen:
 	curl --silent https://raw.githubusercontent.com/artsmia/listen/gh-pages/audio/index.json \
