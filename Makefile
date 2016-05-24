@@ -1,4 +1,4 @@
-links=stories audio-stops artstories listen 3dmodels listen conservation adopt-a-painting
+links=stories audio-stops artstories listen 3dmodels listen conservation adopt-a-painting exhibitions catalogs
 
 stories: import/wordpress.xml
 	node import/stories.js | jq -s -c -r '.[] | .[] | .objectIds, (. + {type: "mia-story"} )' > stories
@@ -54,11 +54,28 @@ adopt-a-painting:
 		cost: .coll_adoptee_cost \
 	}' > adopt-a-painting
 
+exhibitions:
+	find ../collection/exhibitions -name '*.json' | xargs jq -c -r 'select(.exhibition_id) | \
+		(.objects | map(tostring) | join(" ")), { \
+			id: .exhibition_id, \
+			title: .exhibition_title, \
+			description: .exhibition_description, \
+			date: .display_date, \
+			objectIds: .objects, \
+			type: "exhibition" \
+		}' \
+	> exhibitions
+
 clean:
 	@rm stories newsflashes audio-stops artstories 3dmodels
 	redis-cli --raw keys 'object:*:links' | xargs redis-cli del
 
-all: stories newsflashes audio-stops artstories 3dmodels listen
+all: $(links)
+
+catalogs:
+	cat ../mia-catalogs/catalogs.json \
+	| jq -c -r '.[] | .ids, .' \
+	> $@
 
 redis:
 	@for links in $(links); do \
