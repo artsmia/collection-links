@@ -54,15 +54,25 @@ adopt-a-painting:
 		cost: .coll_adoptee_cost \
 	}' > adopt-a-painting
 
+# These are exhibitions to use for testing out the 'rotations' idea
+approvedExhibitions = " 1640 1654 1802 1803 1822 1833 1952 2155 2265 2266 2277 2281 2284 2299 2307 2324 2325 2329 "
+# if I only want exhibitions flagged as 'rotations' in es I can do this (v)
+#
+#     approvedExhibitionRegex=$$(echo $(approvedExhibitions) | sed 's/ /.json\\|/g; s/$$/.json/');
+#     find … | grep $$approvedExhibitionRegex
+#
+# but I want them all, so I'm using a hacky string comparison to populate `rotation:`
+# …though who am I kidding, this whole file is a hacky string comparison '-)
 exhibitions:
-	find ../collection/exhibitions -name '*.json' | xargs jq -c -r 'select(.exhibition_id) | \
+	find ../collection/exhibitions -name '*.json' | xargs jq --arg rotations $(approvedExhibitions) -c -r 'select(.exhibition_id) | \
 		(.objects | map(tostring) | join(" ")), { \
 			id: .exhibition_id, \
 			title: .exhibition_title, \
 			description: .exhibition_description, \
 			date: .display_date, \
 			objectIds: .objects, \
-			type: "exhibition" \
+			type: "exhibition", \
+			rotation: (" " + (.exhibition_id | tostring) + " " | inside($$rotations)) \
 		}' \
 	> exhibitions
 
