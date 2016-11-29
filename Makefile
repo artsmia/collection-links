@@ -20,7 +20,7 @@ artstories:
 	| jq -c -r '.objects | .[] | .id, {title: .title, description: .description, link: ("http://artstories.artsmia.org/#/o/"+.id), type: "artstory"}' \
 	> artstories
 
-3dmodels:
+3dmodels-thingiverse:
 	curl --silent 'http://www.thingiverse.com/rss/user:343731' \
 	| xml2json \
 	| jq -c -r '.rss.channel.item[]' \
@@ -31,14 +31,21 @@ artstories:
 		jq '.' <<<$$json | jq --arg id "$$id" --arg thumb "$$thumb" \
 			'{title: .title, link: .link, id: $$id, type: "3d", thumb: $$thumb}'; \
 	done | jq -c -r '.' | grep -v 'index.php?page=jka' > 3dmodels-thingiverse
+3dmodels-sketchfab:
 	curl --silent 'https://api.sketchfab.com/v2/models?user=4a165be2661d4a6a866ea01d1f76334c' \
 	| jq -c '.results[]' \
 	| while read -r json; do \
 		id=$$(jq '.description' <<<$$json | grep artsmia.org | sed -e 's|.*artsmia.org/art/\([0-9]*\).*|\1|; s|.*artsmia.org/index.php?page=detail&id=\([0-9]*\).*|\1|'); \
 		jq --arg id "$$id" '{type: "3d", title: .name, link: .viewerUrl, thumb: .thumbnails.images[4].url, id: $$id}' <<<$$json; \
 	done | jq -c -r '.' > 3dmodels-sketchfab;
-	cat 3dmodels-* | jq -s -c -r 'map(select((.id | length) > 0)) | sort_by(.id | tonumber) | map(.id, .)[]' > 3dmodels
-	rm 3dmodels-*
+
+3dmodels: 3dmodels-thingiverse 3dmodels-sketchfab
+	cat 3dmodels-* | jq -s -c -r 'map(select((.id | length) > 0)) \
+		| group_by(.id) \
+		| sort_by(.[0].id | tonumber) \
+		| map(.[0].id, if (. | length) > 1 then . else .[] end) \
+		| .[] \
+	  ' > 3dmodels
 
 listen:
 	curl --silent https://raw.githubusercontent.com/artsmia/listen/gh-pages/audio/index.json \
