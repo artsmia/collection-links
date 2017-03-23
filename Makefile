@@ -11,6 +11,7 @@ newsflashes:
 	' > newsflashes
 
 audio-stops:
+	cat ../audio-stops/stops.json > /dev/null
 	curl --silent https://raw.githubusercontent.com/artsmia/audio-stops/master/stops.min.json \
 	| jq -c -r 'to_entries | map(.value) | .[] | {objectId: .object_id, title: .title, link: ("http://audio-tours.s3.amazonaws.com/"+.media_url), type: "audio", number: .audio_stop_number}' \
 	> audio-stops
