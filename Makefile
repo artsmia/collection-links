@@ -40,7 +40,7 @@ artstories:
 		jq --arg id "$$id" '{type: "3d", title: .name, link: .viewerUrl, thumb: .thumbnails.images[4].url, objectId: $$id}' <<<$$json; \
 	done | jq -c -r '.' > 3dmodels-sketchfab;
 
-3dmodels: 3dmodels-thingiverse 3dmodels-sketchfab
+3dmodels: 3dmodels-sketchfab
 	cat 3dmodels-* | jq -s -c -r 'map(select((.objectId | length) > 0)) \
 		| group_by(.objectId) \
 		| sort_by(.[0].objectId | tonumber) \
