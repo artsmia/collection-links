@@ -1,4 +1,4 @@
-links=stories audio-stops artstories listen 3dmodels listen conservation adopt-a-painting exhibitions catalogs
+links=stories audio-stops artstories listen 3dmodels conservation adopt-a-painting exhibitions catalogs
 
 stories: import/wordpress.xml
 	node import/stories.js | jq -s -c -r '.[] | .[] | (. + {objectId: .objectIds, type: "mia-story"} )' > stories
